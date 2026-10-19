@@ -1,90 +1,38 @@
-# React + Vite + Hono + Cloudflare Workers
+# Hybrid Athlete Training app (Vite + React)
 
-[![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/cloudflare/templates/tree/main/vite-react-template)
+Free installable PWA. Your own Google Sheet is the database (via a small Apps Script); an optional free Gemini key powers the Coach.
 
-This template provides a minimal setup for building a React application with TypeScript and Vite, designed to run on Cloudflare Workers. It features hot module replacement, ESLint integration, and the flexibility of Workers deployments.
-
-![React + TypeScript + Vite + Cloudflare Workers](https://imagedelivery.net/wSMYJvS3Xw-n339CbDyDIA/fc7b4b62-442b-4769-641b-ad4422d74300/public)
-
-<!-- dash-content-start -->
-
-🚀 Supercharge your web development with this powerful stack:
-
-- [**React**](https://react.dev/) - A modern UI library for building interactive interfaces
-- [**Vite**](https://vite.dev/) - Lightning-fast build tooling and development server
-- [**Hono**](https://hono.dev/) - Ultralight, modern backend framework
-- [**Cloudflare Workers**](https://developers.cloudflare.com/workers/) - Edge computing platform for global deployment
-
-### ✨ Key Features
-
-- 🔥 Hot Module Replacement (HMR) for rapid development
-- 📦 TypeScript support out of the box
-- 🛠️ ESLint configuration included
-- ⚡ Zero-config deployment to Cloudflare's global network
-- 🎯 API routes with Hono's elegant routing
-- 🔄 Full-stack development setup
-- 🔎 Built-in Observability to monitor your Worker
-
-Get started in minutes with local development or deploy directly via the Cloudflare dashboard. Perfect for building modern, performant web applications at the edge.
-
-<!-- dash-content-end -->
-
-## Getting Started
-
-To start a new project with this template, run:
-
-```bash
-npm create cloudflare@latest -- --template=cloudflare/templates/vite-react-template
+## Develop
 ```
-
-A live deployment of this template is available at:
-[https://react-vite-template.templates.workers.dev](https://react-vite-template.templates.workers.dev)
-
-## Development
-
-Install dependencies:
-
-```bash
 npm install
+npm run dev       # local dev server
+npm test          # 36 tests (vitest)
+npm run build     # outputs dist/
 ```
 
-Start the development server with:
+## Step 1. Google Sheet (5 min)
+1. Open your Training Log sheet (or sheets.new) > Extensions > Apps Script.
+2. Paste `apps-script/Code.gs`, set `PASSWORD` to a long random value, save.
+3. Run `setup` once and approve permissions.
+4. Deploy > New deployment > Web app. Execute as: Me. Access: Anyone. Copy the `/exec` URL.
 
-```bash
-npm run dev
-```
+## Step 2. Host on Cloudflare Pages (free)
+**Option A, drag and drop:** Workers & Pages > Create > Pages > Upload assets, then drop the contents of the prebuilt `dist/` folder.
 
-Your application will be available at [http://localhost:5173](http://localhost:5173).
+**Option B, from Git:** push this project to GitHub, then Pages > Connect to Git with:
+- Build command: `npm run build`
+- Build output directory: `dist`
+- No environment variables.
 
-## Production
+## Step 3. Install on your phone
+Open the site. iPhone: Share > Add to Home Screen. Android: menu > Install app.
+In Training Overview > App connection, paste the Web app URL and password, then Save and test.
 
-Build your project for production:
+## Notes
+- Same `plb-*` storage keys and Sheet layout as the old single-file app, so existing devices and backups keep working.
+- After deploying an update, bump `CACHE` in `public/sw.js` (e.g. `plb-app-v3`) if phones keep showing the old version.
+- Never commit your URL or password; they live only in each device's browser.
+- Spring force assumptions (chest expander 10 kg, crusher 30 kg) are in `src/data/schedule.js` (`SPRING_KG`); edit if yours differ.
 
-```bash
-npm run build
-```
-
-Preview your build locally:
-
-```bash
-npm run preview
-```
-
-Deploy your project to Cloudflare Workers:
-
-```bash
-npm run build && npm run deploy
-```
-
-Monitor your workers:
-
-```bash
-npx wrangler tail
-```
-
-## Additional Resources
-
-- [Cloudflare Workers Documentation](https://developers.cloudflare.com/workers/)
-- [Vite Documentation](https://vitejs.dev/guide/)
-- [React Documentation](https://reactjs.org/)
-- [Hono Documentation](https://hono.dev/)
+## Cloudflare (Git-connected)
+`wrangler.jsonc` serves `dist/` as a single-page app. Build command `npm run build`, no environment variables. Every push to the connected branch redeploys.
